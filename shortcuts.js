@@ -1,61 +1,39 @@
-const modifierPriority = {
-  shift: 16,
-  ctrl: 17,
-  alt: 18
-};
+import {
+  getKeyWithVal,
+  getModifier,
+  captureKeys,
+  generateFullConfigs,
+  arrangeKeyOrders,
+  asciisToCombos,
+  combosToAsciis,
+  sort,
+  sortedCombos,
+  combos,
+  isEscPressed
+} from "./helpers.js";
 
-function captureKeys(keys) {
-  console.log(keys);
-}
-
-const isObject = val =>
-  Object.prototype.toString.call(val) === "[object Object]";
-
-function generateFullConfigs(minConfig) {
-  if (!isObject(minConfig)) {
-    throw Error("Given value must be an object");
+const events = {
+  keydown: comboKeys => event => {
+    comboKeys.add(event.keyCode);
+    console.debug("Event: ", event);
+    console.debug("keyCode: ", event.keyCode);
+    this.match(sort(comboKeys), evt);
+  },
+  keyup: comboKeys => event => {
+    if (isEscPressed(event.keyCode)) {
+      console.debug("Escape pressed -- clearing combo");
+      comboKeys = new Set();
+    } else {
+      console.debug("Removing:", event.keyCode);
+      comboKeys.delete(event.keyCode);
+      console.debug("Combo after removing", comboKeys);
+    }
+  },
+  blur: comboKeys => () => {
+    console.debug("Target out of focus - clearing combo");
+    comboKeys = new Set();
   }
-
-  return Object.keys(minConfig).reduce(
-    (acc, k) => ({
-      ...acc,
-      [k]: {
-        action: minConfig[k]
-      }
-    }),
-    {}
-  );
-}
-
-function arrangeKeyOrders(keys) {}
-
-function asciisToCombos(key) {
-  return key;
-}
-
-function combosToAsciis() {}
-
-function sortedCombos(key) {
-  const keys = key.split("+").map(k => {
-    const kk = k.toLowerCase();
-    return modifierPriority[kk] || kk.charAt(0);
-  });
-
-  return keys.sort();
-}
-
-function combos(config) {
-  const keys = Object.keys(config);
-
-  const sortedComboObj = keys.reduce(
-    (acc, k) => ({
-      ...acc,
-      [asciisToCombos(sortedCombos(k))]: config[k]
-    }),
-    {}
-  );
-  return sortedCombos;
-}
+};
 
 class ShortcutsC {
   static create(config) {
@@ -66,57 +44,42 @@ class ShortcutsC {
     return new ShortcutsC(generateFullConfigs(minConfig));
   }
 
-  constructor(configs) {
+  constructor(configs, target) {
+    if (typeof document === "undefined") {
+      console.error("Currently only supports browser environment");
+      return null;
+    }
     this.configs = combos(configs);
+    console.debug("initial configs", configs);
     this.target = document;
+    console.debug("Targetting document");
+    this.comboKeys = new Set();
     this.listen();
   }
 
   listen() {
-    const { target } = this;
-    let comboKeys = [];
+    const { target, comboKeys } = this;
     const evt = target.addEventListener;
-    evt("keydown", event => {
-      comboKeys.push(event.keyCode);
-      console.log(event.keyCode);
-      this.perform(comboKeys);
-    });
+    const { keydown, keyup, blur } = events;
 
-    evt("keyup", event => {
-      comboKeys.pop(event);
-    });
-
-    evt("blur", () => {
-      comboKeys = [];
-    });
+    evt("keydown", keydown(comboKeys));
+    evt("keyup", keyup(comboKeys));
+    evt("blur", blur(comboKeys));
   }
 
-  unlisten() {
-    this.target.removeEventListener();
+  unlisten(eventName) {
+    this.target.removeEventListener(eventName, events[eventName]);
   }
 
-  perform(keys) {
+  match(keys, evt) {
+    const ok = asciisToCombos(keys);
     const { configs } = this;
-    console.log(configs);
+    if (configs[ok]) {
+      console.debug("Combo matched", ok);
+      configs[ok].action(evt, ok, configs);
+    }
+    console.groupEnd();
   }
 }
 
-const shortcuts = {
-  "ctrl+alt+k": {
-    action: function() {
-      console.log(Array.from({ length: 20 }, (x, i) => i));
-    }
-  }
-};
-
-const minConfigs = {
-  "ctrl+alt+k": function() {
-    console.log("ctrl+alt+k");
-  },
-  "ctrl+s": function() {
-    console.log("ctrl+s");
-  }
-};
-
-const x = ShortcutsC.generate(minConfigs);
-console.log(x);
+export default ShortcutsC;

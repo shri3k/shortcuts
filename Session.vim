@@ -27,12 +27,12 @@ setlocal fml=1
 setlocal fdn=20
 setlocal fen
 silent! normal! zE
-let s:l = 79 - ((46 * winheight(0) + 23) / 47)
+let s:l = 7 - ((6 * winheight(0) + 28) / 57)
 if s:l < 1 | let s:l = 1 | endif
 exe s:l
 normal! zt
-79
-normal! 015|
+7
+normal! 0
 tabnext 1
 if exists('s:wipebuf') && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Test Shortcut</title>
+  </head>
+  <body>
+    Just a dumb body
+  </body>
+  <script type="module">
+import ShortcutsC from './shortcuts.js';
+    const shortcuts = {
+      "ctrl+alt+k": {
+        action: function() {
+          console.log(Array.from({ length: 20 }, (x, i) => i));
+        }
+      }
+    };
+
+    const minConfigs = {
+      "ctrl+alt+k": function(...args) {
+        console.log("args", args);
+        console.log("ctrl+alt+k action firingg....");
+      },
+      "ctrl+s": function() {
+        console.log("ctrl+s");
+      }
+    };
+
+    const x = ShortcutsC.generate(minConfigs);
+    const y = ShortcutsC.create(shortcuts);
+    console.log('ok', x);
+  </script>
+</html>
