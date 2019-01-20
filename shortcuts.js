@@ -12,29 +12,6 @@ import {
   isEscPressed
 } from "./helpers.js";
 
-const events = {
-  keydown: comboKeys => event => {
-    comboKeys.add(event.keyCode);
-    console.debug("Event: ", event);
-    console.debug("keyCode: ", event.keyCode);
-    this.match(sort(comboKeys), evt);
-  },
-  keyup: comboKeys => event => {
-    if (isEscPressed(event.keyCode)) {
-      console.debug("Escape pressed -- clearing combo");
-      comboKeys = new Set();
-    } else {
-      console.debug("Removing:", event.keyCode);
-      comboKeys.delete(event.keyCode);
-      console.debug("Combo after removing", comboKeys);
-    }
-  },
-  blur: comboKeys => () => {
-    console.debug("Target out of focus - clearing combo");
-    comboKeys = new Set();
-  }
-};
-
 class ShortcutsC {
   static create(config) {
     return new ShortcutsC(config);
@@ -57,10 +34,35 @@ class ShortcutsC {
     this.listen();
   }
 
+  events() {
+    return {
+      keydown: comboKeys => event => {
+        comboKeys.add(event.keyCode);
+        console.debug("Event: ", event);
+        console.debug("keyCode: ", event.keyCode);
+        this.match(sort(comboKeys), event);
+      },
+      keyup: comboKeys => event => {
+        if (isEscPressed(event.keyCode)) {
+          console.debug("Escape pressed -- clearing combo");
+          comboKeys = new Set();
+        } else {
+          console.debug("Removing:", event.keyCode);
+          comboKeys.delete(event.keyCode);
+          console.debug("Combo after removing", comboKeys);
+        }
+      },
+      blur: comboKeys => () => {
+        console.debug("Target out of focus - clearing combo");
+        comboKeys = new Set();
+      }
+    };
+  }
+
   listen() {
     const { target, comboKeys } = this;
     const evt = target.addEventListener;
-    const { keydown, keyup, blur } = events;
+    const { keydown, keyup, blur } = this.events();
 
     evt("keydown", keydown(comboKeys));
     evt("keyup", keyup(comboKeys));
@@ -68,7 +70,8 @@ class ShortcutsC {
   }
 
   unlisten(eventName) {
-    this.target.removeEventListener(eventName, events[eventName]);
+    const { events } = this;
+    this.target.removeEventListener(eventName, events()[eventName]);
   }
 
   match(keys, evt) {
@@ -78,7 +81,6 @@ class ShortcutsC {
       console.debug("Combo matched", ok);
       configs[ok].action(evt, ok, configs);
     }
-    console.groupEnd();
   }
 }
 

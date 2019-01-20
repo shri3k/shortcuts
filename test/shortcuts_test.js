@@ -1,1 +1,0 @@
-import Shortcuts from "../shortcuts";
