@@ -11,13 +11,6 @@ import {
 
 import events from "./events.js";
 
-/**
- * combo based - if certain keys are pressed then it automatically starts 
- *               aggregating on the combos
- * 
- * time based - all keys are considered combos based on the specified time
- *              author specifies on
- */
 class Shortcuts {
   static create(config) {
     return new Shortcuts(config);
@@ -36,10 +29,6 @@ class Shortcuts {
     console.debug("initial configs", configs);
     this.target = document;
     this.listen();
-  }
-
-  shortcuts() {
-    return this.configs;
   }
 
   listen() {

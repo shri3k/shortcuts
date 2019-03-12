@@ -6,10 +6,15 @@
     <title>Test Shortcut</title>
   </head>
   <body>
-    Just a dumb body
+    <div>
+      <div id="currentKey">
+      </div>
+      <div id="action">
+      </div>
+    </div>
   </body>
   <script type="module">
-import ShortcutsC from './shortcuts.js';
+    import ShortcutsC from './lib/shortcuts.js';
     const shortcuts = {
       "ctrl+alt+k": {
         action: function() {
@@ -20,16 +25,26 @@ import ShortcutsC from './shortcuts.js';
 
     const minConfigs = {
       "ctrl+alt+k": function(...args) {
+        document.querySelector('#action').innerHTML = `<span> Ctrl + Alt + k </span>`
         console.log("args", args);
-        console.log("ctrl+alt+k action firingg....");
       },
-      "ctrl+s": function() {
-        console.log("ctrl+s");
+      "ctrl+b": function(...args) {
+        document.querySelector('#action').innerHTML = `<span> Ctrl + b</span>`
+        console.log("args", args);
+      },
+      "s+s" : function (...args) {
+        console.log('this', this);
+        document.querySelector('#action').innerHTML = `<span>${this.shortcuts()}</span>`
       }
     };
 
     const x = ShortcutsC.generate(minConfigs);
     const y = ShortcutsC.create(shortcuts);
     console.log('ok', x);
+
+    document.addEventListener('keydown', (evt) => {
+      document.querySelector('#currentKey').innerHTML = `<span>${evt.key}</span>`
+      document.querySelector('#action').innerHTML = ``;
+    });
   </script>
 </html>
