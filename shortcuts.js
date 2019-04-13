@@ -27,7 +27,7 @@ class Shortcuts {
     return new Shortcuts(generateFullConfigs(minConfig));
   }
 
-  constructor(configs, target) {
+  constructor(configs, target, opts={start: false}) {
     if (typeof document === "undefined") {
       console.error("Currently only supports browser environment");
       return null;
@@ -35,14 +35,18 @@ class Shortcuts {
     this.configs = combos(configs);
     console.debug("initial configs", configs);
     this.target = document;
-    this.listen();
+
+    if (opts.start) {
+      this.listenAll();
+    }
   }
 
   shortcuts() {
     return this.configs;
   }
 
-  listen() {
+  listenAll() {
+    this.unlistenAll();
     const { target, configs } = this;
     const evt = target.addEventListener;
     const { keydown, keyup, blur } = events(configs);
@@ -55,6 +59,10 @@ class Shortcuts {
   unlisten(eventName) {
     const { events, target } = this;
     target.removeEventListener(eventName, events()[eventName]);
+  }
+
+  unlistenAll() {
+    Object.keys(events()).forEach(e => unlisten(e));
   }
 }
 

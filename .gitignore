@@ -109,3 +109,5 @@ tags
 
 .undodir
 .undodir
+Session.vim
+.undodir/
