@@ -2,7 +2,7 @@
   "name": "shortcuts",
   "version": "0.0.1",
   "description": "Quickly add shortcuts for your website",
-  "main": "index.js",
+  "main": "shortcuts.js",
   "scripts": {
     "test": "jest",
     "examples": "npm run examples-clean && npm run examples:make && static-server examples/",
